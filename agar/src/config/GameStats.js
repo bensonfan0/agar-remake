@@ -3,7 +3,8 @@
 */
 
 const playerPopulation = 1;
-const numberOfFood = 200;
+const playerSpeed = 0.025; // TODO: this should be acceleration
+const numberOfFood = 50;
 
-export {playerPopulation, numberOfFood};
+export {playerPopulation, playerSpeed, numberOfFood};
 

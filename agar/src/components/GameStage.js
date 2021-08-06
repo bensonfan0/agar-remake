@@ -15,7 +15,7 @@ const GameStage = (props) => {
     let listOfFood = [];
 
     for (let i = 0; i < props.population; i++) {
-        listOfPlayerBlob[i] = <PlayerBlob key={i} coordinates={randomSpawn()}/>
+        listOfPlayerBlob[i] = <PlayerBlob key={i} playerSpeed={props.playerSpeed} coordinates={randomSpawn()}/>
     }
 
     for (let i = 0; i < props.food; i++) {

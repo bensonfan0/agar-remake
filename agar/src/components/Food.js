@@ -6,7 +6,7 @@ const Food = (prop) => {
     let FoodSize = 15;
 
     return (
-        <Blob isPlayer={false} size={FoodSize}/>
+        <Blob size={FoodSize}/>
     )
 }
 
