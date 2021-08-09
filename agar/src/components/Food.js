@@ -6,7 +6,7 @@ const Food = (prop) => {
     let FoodSize = 15;
 
     return (
-        <Blob size={FoodSize}/>
+        <Blob size={FoodSize} />
     )
 }
 
