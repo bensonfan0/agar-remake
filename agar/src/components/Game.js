@@ -1,6 +1,6 @@
 import React from 'react';
 import GameStage from './GameStage';
-import { playerPopulation, numberOfFood, playerSpeed } from '../config/GameStats';
+import { playerPopulation, foodNumber, playerSpeed } from '../config/GameStats';
 
 const Game = () => {
     // TODO: movement
@@ -15,7 +15,7 @@ const Game = () => {
             <GameStage
                 population={playerPopulation}
                 playerSpeed={playerSpeed}
-                food={numberOfFood} />
+                food={foodNumber} />
         </div>
     )
 }

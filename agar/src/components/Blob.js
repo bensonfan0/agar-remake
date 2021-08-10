@@ -7,30 +7,32 @@ const Blob = (props) => {
     let blobY;
     let blobX;
 
+    //console.log("IM INSIDE BLOB: ",props);
+
     if (props.playerSettings !== undefined) {
         blobX = props.playerSettings.coordinates.x;
         blobY = props.playerSettings.coordinates.y;
     } else {
-        blobY = Math.floor(Math.random() * window.innerHeight);
-        blobX = Math.floor(Math.random() * window.innerWidth);
+        blobX = props.coordinates.x;
+        blobY = props.coordinates.y;
     }
 
     let blobStyle = {
-        backgroundColor: randomRBGColor(),
+        backgroundColor: 'black',
         height: `${props.size}px`,
         width: `${props.size}px`,
-        borderRadius: '80%',
+        borderRadius: '100%',
         top: `${blobY}px`,
         left: `${blobX}px`
     };
-
 
     // note top == x and left == y
 
     if (props.playerSettings !== undefined) {
         blobStyle.backgroundColor = props.playerSettings.color;
+    } else {
+        blobStyle.backgroundColor = props.color;
     }
-
     return (
         <div className='blob' style={blobStyle}>
             {(props.playerSettings !== undefined ? props.playerSettings.playerName : '')}
@@ -38,4 +40,4 @@ const Blob = (props) => {
     )
 }
 
-export default React.memo(Blob);
+export default Blob;

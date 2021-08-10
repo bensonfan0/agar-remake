@@ -1,12 +1,12 @@
 import React from 'react';
 import Blob from './Blob';
+import { randomRBGColor } from '../GameHelper';
 
-const Food = (prop) => {
 
-    let FoodSize = 15;
+const Food = (props) => {
 
     return (
-        <Blob size={FoodSize} />
+        <Blob size={props.size} coordinates={props.coordinates} color={props.color}/>
     )
 }
 

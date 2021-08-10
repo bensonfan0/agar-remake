@@ -2,9 +2,12 @@
     configuration settings for game
 */
 
-const playerPopulation = 1;
-const playerSpeed = 0.05; // TODO: this should be acceleration
-const numberOfFood = 50;
+export const playerPopulation = 1;
+export const playerSpeed = 0.05; // TODO: this should be acceleration
+export const playerStartSize = 50; 
+export const foodNumber = 10;
+export const foodSize = 15;
 
-export { playerPopulation, playerSpeed, numberOfFood };
+
+
 
