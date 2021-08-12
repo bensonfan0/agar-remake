@@ -22,8 +22,8 @@ const Blob = (props) => {
         height: `${props.size}px`,
         width: `${props.size}px`,
         borderRadius: '100%',
-        top: `${blobY}px`,
-        left: `${blobX}px`
+        top: `${blobY - props.size/2}px`,
+        left: `${blobX - props.size/2}px`
     };
 
     // note top == x and left == y
