@@ -4,7 +4,7 @@
 
 export const playerPopulation = 1;
 export const botPopulation = 3;
-export const playerAcceleration = 0.1; // TODO: this should be acceleration.. or is it velocity??
+export const playerAcceleration = 0.1;
 export const playerStartArea = 2500; 
 export const foodNumber = 50;
 export const foodArea = 200;

@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { randomRBGColor } from '../GameHelper';
+import React from 'react';
 
-let blobCenterCoordinates = { x: 0, y: 0 };
 
 const Blob = (props) => {
     let blobY;
     let blobX;
-
-    //console.log("IM INSIDE BLOB: ",props);
 
     if (props.playerSettings !== undefined) {
         blobX = props.playerSettings.coordinates.x;
@@ -16,8 +12,6 @@ const Blob = (props) => {
         blobX = props.coordinates.x;
         blobY = props.coordinates.y;
     }
-
-    //r = sqrt(Area/pi)
     
     let radius = Math.sqrt(props.area / Math.PI)
     let sideLength = radius * 2;
@@ -30,8 +24,6 @@ const Blob = (props) => {
         top: `${blobY - radius}px`,
         left: `${blobX - radius}px`
     };
-
-    //console.log("this is blobStyle", blobStyle, "this is radius", radius);
 
     // note top == x and left == y
 

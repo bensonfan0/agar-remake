@@ -1,3 +1,8 @@
+/**
+ * helper functions used in GameStage
+ */
+
+
 export const randomRBGColor = () => {
     let x = Math.floor(Math.random() * 256);
     let y = Math.floor(Math.random() * 256);
@@ -47,62 +52,12 @@ export const newPlayerCoordinates = (playerCoordinates, mouseCoordinates, player
         }
     }
 
-    // update coordinates
     let newCoordinates = { x: playerCoordinates.x, y: playerCoordinates.y };
     newCoordinates.x += playerVelocity.dx;
     newCoordinates.y += playerVelocity.dy;
 
     return [newCoordinates, playerVelocity];
 };
-
-export const newBotCoordinates = (playerCoordinates, randomCoordinates, playerVelocity, gameAcceleration) => {
-    // within range
-    if (playerCoordinates.x < randomCoordinates.x + 2 && playerCoordinates.x > randomCoordinates.x - 2 && 
-        playerCoordinates.y < randomCoordinates.y + 2 && playerCoordinates.y > randomCoordinates.y - 2) return (
-        [playerCoordinates, {dx:0,dy:0}]
-    )
-
-    let xCoordBehindMouse = randomCoordinates.x < playerCoordinates.x;
-    // handle y direction acceleration
-    let yCoordBelowMouse = randomCoordinates.y < playerCoordinates.y;
-    let doDoubleTakeSpeed = gameAcceleration * 6;
-
-    if (xCoordBehindMouse) {
-        if (playerVelocity.dx < 0) {
-            playerVelocity.dx += -gameAcceleration;
-        } else {
-            // accelerating wrong direction - do a double take
-            playerVelocity.dx += -doDoubleTakeSpeed;
-        }
-    } else if (!xCoordBehindMouse) {
-        if (playerVelocity.dx > 0) {
-            playerVelocity.dx += gameAcceleration;
-        } else {
-            // accelerating wrong direction - do a double take
-            playerVelocity.dx += doDoubleTakeSpeed;
-        }
-    }
-    if (yCoordBelowMouse) {
-        if (playerVelocity.dy < 0) {
-            playerVelocity.dy += -gameAcceleration;
-        } else {
-            playerVelocity.dy += -doDoubleTakeSpeed;
-        }
-    } else if (!yCoordBelowMouse) {
-        if (playerVelocity.dy > 0) {
-            playerVelocity.dy += gameAcceleration;
-        } else {
-            playerVelocity.dy += doDoubleTakeSpeed;
-        }
-    }
-
-    // update coordinates
-    let newCoordinates = { x: playerCoordinates.x, y: playerCoordinates.y };
-    newCoordinates.x += playerVelocity.dx;
-    newCoordinates.y += playerVelocity.dy;
-
-    return [newCoordinates, playerVelocity];
-}
 
 export const isCollidingFood = (playerBlob, listOfFood) => {
     return isCollidingBlob(playerBlob, listOfFood);
@@ -113,13 +68,7 @@ export const isCollidingPlayer = (playerBlob, listOfPlayerBlob) => {
 };
 
 const isCollidingBlob = (blob, listOfBlob) => {
-    // check if colliding with food
-    //console.log("helper function this is playerBlob", playerBlob);
     let playerRadius = Math.sqrt(blob.props.area / Math.PI);
-    
-    // let cx = playerBlob.props.coordinates.x + playerRadius;
-    // let cy = playerBlob.props.coordinates.y + playerRadius;
-    
     // no need to offset radius because compensated in Blob
     let cx = blob.props.coordinates.x;
     let cy = blob.props.coordinates.y;
@@ -127,9 +76,6 @@ const isCollidingBlob = (blob, listOfBlob) => {
     
     for (let i = 0; i < listOfBlob.length; i++) {
         let otherBlobRadius = Math.sqrt(listOfBlob[i].props.area / Math.PI);
-        // let cxFood = listOfFood[i].props.coordinates.x + foodRadius;
-        // let cyFood = listOfFood[i].props.coordinates.y + foodRadius;
-    
         // no need to offset radius because compensated in Blob
         let cxOtherBlob = listOfBlob[i].props.coordinates.x;
         let cyOtherBlob = listOfBlob[i].props.coordinates.y;
@@ -139,12 +85,7 @@ const isCollidingBlob = (blob, listOfBlob) => {
         
         let cDistance = Math.sqrt(dx * dx + dy * dy);
     
-        //console.log("this is food", listOfFood[i]);
-        //console.log("cx:", cx, "cy:", cy);
-        //console.log("cxFood:", cxFood, "cyFood:", cyFood);
-        //console.log("cDistance:", cDistance);
         if (cDistance < playerRadius + otherBlobRadius) {
-            //console.log("collision detected!", listOfBlob[i]);
             return [true, listOfBlob[i]];
         }
     }
@@ -164,8 +105,11 @@ export const blobElasticCollision = (blob1, blob2) => {
      * velocity with two vectors {dx, dy}
      * 
      * v_1prime = v_2 - 2m_2 / (m_1 + m_2) < v_1 - v_2 , x_1 - x_2 > / || x_1 - x_2 ||^2 (x_1 - x_2)
+     * 
+     * refer to https://en.wikipedia.org/wiki/Elastic_collision
+     * https://spicyyoghurt.com/tutorials/html5-javascript-game-development/collision-detection-physics
      */
-    
+
     let newObj1Velocity = {dx:blob1.props.velocity.dx, dy:blob1.props.velocity.dy};
     let newObj2Velocity = {dx:blob2.props.velocity.dx, dy:blob2.props.velocity.dy};
     
@@ -180,7 +124,6 @@ export const blobElasticCollision = (blob1, blob2) => {
     }
     let impulse = 2 * speed / (blob1.props.area + blob2.props.area)
 
-    
     newObj1Velocity.dx -= (impulse * blob2.props.area * vCollisionNorm.x);
     newObj1Velocity.dy -= (impulse * blob2.props.area * vCollisionNorm.y);
     newObj2Velocity.dx += (impulse * blob1.props.area * vCollisionNorm.x);

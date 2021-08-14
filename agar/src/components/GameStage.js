@@ -33,27 +33,17 @@ const setUpPlayers = (gameStageProps, listOfPlayerBlob, listOfBotBlob, listOfFoo
 const GameStage = (props) => {
     const [renderTime, setRenderTime] = useState(0);
     const [mouseCoordinates, setMouseCoordinates] = useState({x:0,y:0});
-
     const [listOfRandomCoord, setRandomCoordinates] = useState([]);
     const [listOfPlayerBlob, setListOfPlayerBlob] = useState([]);
     const [listOfBotBlob, setListOfBotBlob] = useState([]);
     const [listOfFood, setListOfFood] = useState([]);
-    //console.log(listOfBotBlob);
-    //console.log(listOfPlayerBlob);
-
-    //console.log(listOfPlayerBlob);
 
     if (listOfPlayerBlob.length === 0) {
-        //console.log("im being called!");
         setUpPlayers(props, listOfPlayerBlob, listOfBotBlob, listOfFood, listOfRandomCoord);
     } 
 
-    //console.log(listOfPlayerBlob, listOfFood);
-
     const setMouseLastPosition = (event) => {
-        //moveListOfPlayerBlob();
         setMouseCoordinates({x:event.x,y:event.y});
-        //console.log(event, mouseCoordinates);
     };
 
     useEffect(() => {
@@ -76,12 +66,10 @@ const GameStage = (props) => {
         }
     }, [renderTime]);
 
-    //console.log("I am getting rendered sandwich!");
     const moveListOfPlayerBlob = () => {
         let newListOfPLayerBlob = [];
         let newListOfBotBlob = [];
         let newlistOfRandomCoord = [];
-
         
         for (let i = 0; i < listOfPlayerBlob.length; i++) {
             newListOfPLayerBlob[i] = handlePlayerMove(listOfPlayerBlob[i], i);
@@ -90,7 +78,7 @@ const GameStage = (props) => {
             newListOfBotBlob[i] = handleBotMove(listOfBotBlob[i], listOfRandomCoord[i], i);
         }
         
-        // some interval every 10000 / 20 ms
+        // produce random movement for bots
         if (renderTime % 100 === 0) {
             for (let i = 0; i < listOfRandomCoord.length; i++) {
                 newlistOfRandomCoord[i] = {x:Math.random() * window.innerWidth, y:Math.random() * window.innerHeight};
@@ -103,7 +91,6 @@ const GameStage = (props) => {
     }
 
     const handleBotMove = (botBlob, botCoordinates, i) => {
-        // we need to compare bots here too..
         return blobMove(botBlob, i, botCoordinates, listOfPlayerBlob, listOfBotBlob);
     }
 
@@ -142,7 +129,6 @@ const GameStage = (props) => {
         [ newArea, newCoordinates, newPlayerColor, newVelocity ] = handlePlayerCollision(blob, listOfAliveBlob, newArea, newCoordinates, newPlayerColor, newVelocity, newVelocityOtherBlob);
 
         newVelocity = velocityNotExceedingMax(newVelocity, blob.props.maxVelocity);
-        // max area...
         if (newArea > maxArea) newArea = maxArea;
         
         return <PlayerBlob key={i} name={blob.props.name} coordinates={newCoordinates} playerSpeed={newPlayerSpeed} area={newArea} velocity={newVelocity} maxVelocity={maxVelocityNumerator/newArea} color={newPlayerColor}/>;
@@ -162,10 +148,7 @@ const GameStage = (props) => {
                 // gain their area
                 newArea += otherPlayer.props.area;
             } else {
-                /*
-                Suppose perfectly elastic collision
-                Use 2 vector matrices
-                */
+                // perfectly elastic collision
                 [newVelocity, newVelocityOtherBlob] = blobElasticCollision(blob, otherPlayer);
                 console.log("BOUNCE BOUNCE BOUNCE",newVelocity);
             }
@@ -179,25 +162,19 @@ const GameStage = (props) => {
 
         let dx = (Math.abs(velocity.dx) > maxVelocity ? maxVelocity * xSign : velocity.dx);
         let dy = (Math.abs(velocity.dy) > maxVelocity ? maxVelocity * ySign : velocity.dy);
-        //console.log(dx, dy);
         return {dx:dx, dy:dy}
     }
 
     const updateFood = (foodToRemove) => {
         let indexToRemove = listOfFood.findIndex(element => element === foodToRemove);
-        //console.log("indexToRemove", indexToRemove);
         let newListOfFood = [];
         for (let i = 0; i < listOfFood.length; i++) {
             let foodCoordinates = (i === indexToRemove ? randomSpawn() : listOfFood[i].props.coordinates);
             let foodColor = (i === indexToRemove ? randomRBGColor() : listOfFood[i].props.coordinates)
             newListOfFood[i] = <Food key={i} area={foodArea} coordinates={foodCoordinates} color={foodColor}/>;
         }
-        //console.log(listOfFood);
-        //console.log(newListOfFood);
         setListOfFood(newListOfFood);
     }
-    
-    //console.log("I am getting rendered!!", listOfPlayerBlob);
     
     return (
         <div>
