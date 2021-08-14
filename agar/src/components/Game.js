@@ -1,6 +1,6 @@
 import React from 'react';
 import GameStage from './GameStage';
-import { playerPopulation, botPopulation, foodNumber, playerSpeed } from '../config/GameStats';
+import { playerPopulation, botPopulation, foodNumber, playerAcceleration } from '../config/GameStats';
 
 const Game = () => {
     // TODO: screen moves with component
@@ -11,7 +11,7 @@ const Game = () => {
             <GameStage
                 population={playerPopulation}
                 botPopulation={botPopulation}
-                playerSpeed={playerSpeed}
+                playerAcceleration={playerAcceleration}
                 food={foodNumber} />
         </div>
     )

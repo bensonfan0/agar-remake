@@ -17,14 +17,21 @@ const Blob = (props) => {
         blobY = props.coordinates.y;
     }
 
+    //r = sqrt(Area/pi)
+    
+    let radius = Math.sqrt(props.area / Math.PI)
+    let sideLength = radius * 2;
+
     let blobStyle = {
         backgroundColor: 'black',
-        height: `${props.size}px`,
-        width: `${props.size}px`,
+        height: `${sideLength}px`,
+        width: `${sideLength}px`,
         borderRadius: '100%',
-        top: `${blobY - props.size/2}px`,
-        left: `${blobX - props.size/2}px`
+        top: `${blobY - radius}px`,
+        left: `${blobX - radius}px`
     };
+
+    //console.log("this is blobStyle", blobStyle, "this is radius", radius);
 
     // note top == x and left == y
 

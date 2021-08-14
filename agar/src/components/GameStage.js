@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { isCollidingPlayer, isCollidingFood, newPlayerCoordinates, newBotCoordinates, randomRBGColor } from '../GameHelper';
+import { isCollidingPlayer, isCollidingFood, newPlayerCoordinates, randomRBGColor, blobElasticCollision } from '../GameHelper';
 import PlayerBlob from './PlayerBlob';
 import Food from './Food';
-import { playerStartSize, playerSpeed ,foodSize, maxAccelerationNumerator, botPopulation } from '../config/GameStats';
-import { render } from 'react-dom';
+import { playerStartArea, playerAcceleration ,foodArea, maxVelocityNumerator, botPopulation, consumableRatio, maxArea } from '../config/GameStats';
 
 const randomSpawn = () => {
     let spawnCoordinates = { x: 0, y: 0 };
@@ -15,15 +14,15 @@ const randomSpawn = () => {
 
 const setUpPlayers = (gameStageProps, listOfPlayerBlob, listOfBotBlob, listOfFood, listOfRandomCoord) => {
     for (let i = 0; i < gameStageProps.population; i++) {
-        listOfPlayerBlob[i] = <PlayerBlob key={i} name={'filler_name'} playerSpeed={gameStageProps.playerSpeed} coordinates={randomSpawn()} size={playerStartSize} acceleration={{dx:0, dy:0}} maxAcceleration={maxAccelerationNumerator/playerStartSize} color={randomRBGColor()}/>;
+        listOfPlayerBlob[i] = <PlayerBlob key={i} name={'filler_name'} playerSpeed={gameStageProps.playerAcceleration} coordinates={randomSpawn()} area={playerStartArea} velocity={{dx:0, dy:0}} maxVelocity={maxVelocityNumerator/playerStartArea} color={randomRBGColor()}/>;
     }
 
     for (let i = 0; i < gameStageProps.botPopulation; i++) {
-        listOfBotBlob[i] = <PlayerBlob key={i} name={`bot_${i}`} playerSpeed={gameStageProps.playerSpeed} coordinates={randomSpawn()} size={playerStartSize} acceleration={{dx:0, dy:0}} maxAcceleration={maxAccelerationNumerator/playerStartSize} color={randomRBGColor()}/>;
+        listOfBotBlob[i] = <PlayerBlob key={i} name={`bot_${i}`} playerSpeed={gameStageProps.playerAcceleration} coordinates={randomSpawn()} area={playerStartArea} velocity={{dx:0, dy:0}} maxVelocity={maxVelocityNumerator/playerStartArea} color={randomRBGColor()}/>;
     }
 
     for (let j = 0; j < gameStageProps.food; j++) {
-        listOfFood[j] = <Food key={j} size={foodSize} coordinates={randomSpawn()} color={randomRBGColor()}/>;
+        listOfFood[j] = <Food key={j} area={foodArea} coordinates={randomSpawn()} color={randomRBGColor()}/>;
     }
 
     for (let i = 0; i < botPopulation; i++) {
@@ -104,40 +103,82 @@ const GameStage = (props) => {
     }
 
     const handleBotMove = (botBlob, botCoordinates, i) => {
-        return blobMove(botBlob, botCoordinates, listOfBotBlob, i);
+        // we need to compare bots here too..
+        return blobMove(botBlob, i, botCoordinates, listOfPlayerBlob, listOfBotBlob);
     }
 
     const handlePlayerMove = (playerBlob, i) => {
-        return blobMove(playerBlob, mouseCoordinates, listOfPlayerBlob, i);
+        return blobMove(playerBlob, i, mouseCoordinates, listOfBotBlob);
     }
 
-    const blobMove = (blob, moveToCoordinates, listOfAliveBlob, i) => {
-        let [newCoordinates, newAcceleration] = newPlayerCoordinates(blob.props.coordinates, moveToCoordinates, blob.props.acceleration, playerSpeed);
+    const blobMove = (blob, i, moveToCoordinates, listOfAliveBlob, listOfBotBlob) => {
+        let newCoordinates = {x:blob.props.coordinates.x, y:blob.props.coordinates.y};
+        let newVelocity = {dx:blob.props.velocity.dx, dy:blob.props.velocity.dy};
+        let newVelocityOtherBlob = {dx:0, dy:0};
         
-        newAcceleration = accelerationNotExceedingMax(newAcceleration, blob.props.maxAcceleration);
-        
-        let newSize = blob.props.size;
+        let newArea = blob.props.area;
         let newPlayerSpeed = blob.props.playerSpeed;
-        let playerColor = blob.props.color;
+        let newPlayerColor = blob.props.color;
         let [isColliding, FoodToRemove] = isCollidingFood(blob, listOfFood);
         if (isColliding) {
             updateFood(FoodToRemove);
-            newSize += + 5;
+            newArea += + foodArea;
             (newPlayerSpeed *= 1/2 < Number.MIN_VALUE ? newPlayerSpeed *= 1/2 : newPlayerSpeed = Number.MIN_VALUE)
         }
+        
+        [newCoordinates, newVelocity] = newPlayerCoordinates(blob.props.coordinates, moveToCoordinates, blob.props.velocity, playerAcceleration);
 
-        if (isCollidingPlayer(blob, listOfAliveBlob)) {
-
+        if (listOfBotBlob !== undefined) {
+            let botBlobsToCheck = listOfBotBlob.map((bot, index) => {
+                if (blob === bot) {
+                    // a dummy bot
+                    return <PlayerBlob key={index} name={''} coordinates={{x:-50,y:-50}} playerSpeed={1} area={1} velocity={{dx:0,dy:0}} maxVelocity={0} color={'red'}/> 
+                }
+                return bot;
+            });
+            [ newArea, newCoordinates, newPlayerColor, newVelocity ] = handlePlayerCollision(blob, botBlobsToCheck, newArea, newCoordinates, newPlayerColor, newVelocity, newVelocityOtherBlob);
         }
-        return <PlayerBlob key={i} name={blob.props.name} coordinates={newCoordinates} playerSpeed={newPlayerSpeed} size={newSize} acceleration={newAcceleration} maxAcceleration={maxAccelerationNumerator/newSize} color={playerColor}/>;
+
+        [ newArea, newCoordinates, newPlayerColor, newVelocity ] = handlePlayerCollision(blob, listOfAliveBlob, newArea, newCoordinates, newPlayerColor, newVelocity, newVelocityOtherBlob);
+
+        newVelocity = velocityNotExceedingMax(newVelocity, blob.props.maxVelocity);
+        // max area...
+        if (newArea > maxArea) newArea = maxArea;
+        
+        return <PlayerBlob key={i} name={blob.props.name} coordinates={newCoordinates} playerSpeed={newPlayerSpeed} area={newArea} velocity={newVelocity} maxVelocity={maxVelocityNumerator/newArea} color={newPlayerColor}/>;
     }
 
-    const accelerationNotExceedingMax = (acceleration, maxAcceleration) => {
-        let xSign = Math.sign(acceleration.dx);
-        let ySign = Math.sign(acceleration.dy);
+    const handlePlayerCollision = (blob, listOfAliveBlob, newArea, newCoordinates, newPlayerColor, newVelocity, newVelocityOtherBlob) => {
+        let [isPlayerColliding, otherPlayer] = isCollidingPlayer(blob, listOfAliveBlob);
+        if (isPlayerColliding) {
+            console.log("colliding players!");
+    
+            if (otherPlayer.props.area > blob.props.area * consumableRatio) {
+                // die, spawn again
+                newArea = playerStartArea;
+                newCoordinates = randomSpawn();
+                newPlayerColor = randomRBGColor();
+            } else if (otherPlayer.props.area * consumableRatio < blob.props.area) {
+                // gain their area
+                newArea += otherPlayer.props.area;
+            } else {
+                /*
+                Suppose perfectly elastic collision
+                Use 2 vector matrices
+                */
+                [newVelocity, newVelocityOtherBlob] = blobElasticCollision(blob, otherPlayer);
+                console.log("BOUNCE BOUNCE BOUNCE",newVelocity);
+            }
+        }
+        return [ newArea, newCoordinates, newPlayerColor, newVelocity ];
+    }
+    
+    const velocityNotExceedingMax = (velocity, maxVelocity) => {
+        let xSign = Math.sign(velocity.dx);
+        let ySign = Math.sign(velocity.dy);
 
-        let dx = (Math.abs(acceleration.dx) > maxAcceleration ? maxAcceleration * xSign : acceleration.dx);
-        let dy = (Math.abs(acceleration.dy) > maxAcceleration ? maxAcceleration * ySign : acceleration.dy);
+        let dx = (Math.abs(velocity.dx) > maxVelocity ? maxVelocity * xSign : velocity.dx);
+        let dy = (Math.abs(velocity.dy) > maxVelocity ? maxVelocity * ySign : velocity.dy);
         //console.log(dx, dy);
         return {dx:dx, dy:dy}
     }
@@ -149,15 +190,15 @@ const GameStage = (props) => {
         for (let i = 0; i < listOfFood.length; i++) {
             let foodCoordinates = (i === indexToRemove ? randomSpawn() : listOfFood[i].props.coordinates);
             let foodColor = (i === indexToRemove ? randomRBGColor() : listOfFood[i].props.coordinates)
-            newListOfFood[i] = <Food key={i} size={foodSize} coordinates={foodCoordinates} color={foodColor}/>;
+            newListOfFood[i] = <Food key={i} area={foodArea} coordinates={foodCoordinates} color={foodColor}/>;
         }
         //console.log(listOfFood);
         //console.log(newListOfFood);
         setListOfFood(newListOfFood);
     }
-
+    
     //console.log("I am getting rendered!!", listOfPlayerBlob);
-
+    
     return (
         <div>
             {listOfFood}
@@ -166,5 +207,6 @@ const GameStage = (props) => {
         </div>
     )
 }
+
 
 export default GameStage;

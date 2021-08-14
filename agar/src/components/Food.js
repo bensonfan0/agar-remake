@@ -6,7 +6,7 @@ import { randomRBGColor } from '../GameHelper';
 const Food = (props) => {
 
     return (
-        <Blob size={props.size} coordinates={props.coordinates} color={props.color}/>
+        <Blob area={props.area} coordinates={props.coordinates} color={props.color}/>
     )
 }
 
