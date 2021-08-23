@@ -98,6 +98,7 @@ const GameStage = (props) => {
     }, [mouseCoordinates])
 
 
+    // this is where all the rendering happens...
     useEffect(() => {
         moveListOfPlayerBlob();
         // TODO: figure out how to use requestAnimationFrame() here instead of setInterval()

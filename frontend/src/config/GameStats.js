@@ -2,6 +2,7 @@
     configuration settings for game
 */
 
+// TODO: make this an object instead of multiple export variables
 export const playerPopulation = 1;
 export const botPopulation = 3;
 export const playerAcceleration = 0.1;
