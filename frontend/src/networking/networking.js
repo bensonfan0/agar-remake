@@ -1,5 +1,12 @@
 import io from 'socket.io-client';
 
+/**
+ * Note: socket.on(MESSAGE, callbackfn(parameter1, parameter2, ...)) 
+ *      - on() will handle event sent with emit()
+ * 
+ * when socket.emit(MESSAGE, parameter1, parameter2, ...)  
+ */
+
 const socketProtocol = (window.location.protocol.includes('https')) ? 'wss' : 'ws';
 const socket = io(`${socketProtocol}://${window.location.host}`, { reconnection: false });
 

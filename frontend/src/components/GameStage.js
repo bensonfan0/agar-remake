@@ -5,17 +5,11 @@ import {
     newPlayerCoordinates,
     randomRBGColor,
     blobElasticCollision
-} from '../GameHelper';
-import PlayerBlob from './PlayerBlob';
-import Food from './Food';
+} from '../gameHelper';
+import PlayerBlob from './playerBlob';
+import Food from './food';
 import {
-    playerStartArea,
-    playerAcceleration,
-    foodArea,
-    maxVelocityNumerator,
-    botPopulation,
-    consumableRatio,
-    maxArea
+    GAME_CONFIGS
 } from '../config/GameStats';
 
 const randomSpawn = () => {
@@ -34,34 +28,34 @@ const setUpPlayers = (gameStageProps,
     for (let i = 0; i < gameStageProps.population; i++) {
         listOfPlayerBlob[i] = <PlayerBlob key={i}
             name={'filler_name'}
-            playerSpeed={gameStageProps.playerAcceleration}
+            playerSpeed={gameStageProps.GAME_CONFIGS.PLAYER_ACCELERATION}
             coordinates={randomSpawn()}
-            area={playerStartArea}
+            area={GAME_CONFIGS.PLAYER_START_AREA}
             velocity={{ dx: 0, dy: 0 }}
-            maxVelocity={maxVelocityNumerator / playerStartArea}
+            maxVelocity={GAME_CONFIGS.MAX_VELOCITY_NUMERATOR / GAME_CONFIGS.PLAYER_START_AREA}
             color={randomRBGColor()} />;
     }
 
-    for (let i = 0; i < gameStageProps.botPopulation; i++) {
+    for (let i = 0; i < gameStageProps.GAME_CONFIGS.BOT_POPULATION; i++) {
         listOfBotBlob[i] = <PlayerBlob key={i}
             name={`bot_${i}`}
-            playerSpeed={gameStageProps.playerAcceleration}
+            playerSpeed={gameStageProps.GAME_CONFIGS.PLAYER_ACCELERATION}
             coordinates={randomSpawn()}
-            area={playerStartArea}
+            area={GAME_CONFIGS.PLAYER_START_AREA}
             velocity={{ dx: 0, dy: 0 }}
-            maxVelocity={maxVelocityNumerator / playerStartArea}
+            maxVelocity={GAME_CONFIGS.MAX_VELOCITY_NUMERATOR / GAME_CONFIGS.PLAYER_START_AREA}
             color={randomRBGColor()} />;
     }
 
     for (let j = 0; j < gameStageProps.food; j++) {
         listOfFood[j] = <Food key={j}
-            area={foodArea}
+            area={GAME_CONFIGS.FOOD_AREA}
             coordinates={randomSpawn()}
             color={randomRBGColor()} />;
     }
 
     // TODO: create a map instead of two coupled arrays
-    for (let i = 0; i < botPopulation; i++) {
+    for (let i = 0; i < GAME_CONFIGS.BOT_POPULATION; i++) {
         listOfRandomCoord[i] = {
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight
@@ -166,7 +160,7 @@ const GameStage = (props) => {
         let [isColliding, FoodToRemove] = isCollidingFood(blob, listOfFood);
         if (isColliding) {
             updateFood(FoodToRemove);
-            newArea += + foodArea;
+            newArea += + GAME_CONFIGS.FOOD_AREA;
             (newPlayerSpeed *= 1 / 2 < Number.MIN_VALUE ?
                 newPlayerSpeed *= 1 / 2 :
                 newPlayerSpeed = Number.MIN_VALUE)
@@ -175,7 +169,7 @@ const GameStage = (props) => {
         [newCoordinates, newVelocity] = newPlayerCoordinates(blob.props.coordinates,
             moveToCoordinates,
             blob.props.velocity,
-            playerAcceleration);
+            GAME_CONFIGS.PLAYER_ACCELERATION);
 
         if (listOfBotBlob !== undefined) {
             let botBlobsToCheck = listOfBotBlob.map((bot, index) => {
@@ -209,7 +203,7 @@ const GameStage = (props) => {
             newVelocityOtherBlob);
 
         newVelocity = velocityNotExceedingMax(newVelocity, blob.props.maxVelocity);
-        if (newArea > maxArea) newArea = maxArea;
+        if (newArea > GAME_CONFIGS.MAX_AREA) newArea = GAME_CONFIGS.MAX_AREA;
 
         return <PlayerBlob key={i}
             name={blob.props.name}
@@ -217,7 +211,7 @@ const GameStage = (props) => {
             playerSpeed={newPlayerSpeed}
             area={newArea}
             velocity={newVelocity}
-            maxVelocity={maxVelocityNumerator / newArea}
+            maxVelocity={GAME_CONFIGS.MAX_VELOCITY_NUMERATOR / newArea}
             color={newPlayerColor} />;
     }
 
@@ -230,12 +224,12 @@ const GameStage = (props) => {
         newVelocityOtherBlob) => {
         let [isPlayerColliding, otherPlayer] = isCollidingPlayer(blob, listOfAliveBlob);
         if (isPlayerColliding) {
-            if (otherPlayer.props.area > blob.props.area * consumableRatio) {
+            if (otherPlayer.props.area > blob.props.area * GAME_CONFIGS.CONSUMABLE_RATIO) {
                 // die, spawn again
-                newArea = playerStartArea;
+                newArea = GAME_CONFIGS.PLAYER_START_AREA;
                 newCoordinates = randomSpawn();
                 newPlayerColor = randomRBGColor();
-            } else if (otherPlayer.props.area * consumableRatio < blob.props.area) {
+            } else if (otherPlayer.props.area * GAME_CONFIGS.CONSUMABLE_RATIO < blob.props.area) {
                 // gain their area
                 newArea += otherPlayer.props.area;
             } else {
@@ -270,7 +264,7 @@ const GameStage = (props) => {
                 randomRBGColor() :
                 listOfFood[i].props.coordinates)
             newListOfFood[i] = <Food key={i}
-                area={foodArea}
+                area={GAME_CONFIGS.FOOD_AREA}
                 coordinates={foodCoordinates}
                 color={foodColor} />;
         }

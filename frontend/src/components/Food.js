@@ -1,5 +1,5 @@
 import React from 'react';
-import Blob from './Blob';
+import Blob from './blob';
 
 
 const Food = (props) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import GameStage from './GameStage';
-import { playerPopulation, botPopulation, foodNumber, playerAcceleration } from '../config/GameStats';
+import GameStage from './gameStage';
+import { GAME_CONFIGS } from '../config/gameConfigs';
 import { connect } from '../networking';
 
 
@@ -13,6 +13,8 @@ const Game = () => {
     const [data, setData] = useState(null);
     const [pollAgain, setPollAgain] = useState(0);
 
+
+    // this should be where rendering happens
     useEffect(() => {
         fetch("/api")
         .then(res => res.json())
@@ -25,16 +27,16 @@ const Game = () => {
         return () => {
             clearInterval(interval);
         }
-    }, [pollAgain])
+    }, [pollAgain]);
 
     return (
         <div>
             <p>From server: {data}</p>
             <GameStage
-                population={playerPopulation}
-                botPopulation={botPopulation}
-                playerAcceleration={playerAcceleration}
-                food={foodNumber} />
+                population={GAME_CONFIGS.PLAYER_POPULATION}
+                botPopulation={GAME_CONFIGS.BOT_POPULATION}
+                playerAcceleration={GAME_CONFIGS.PLAYER_ACCELERATION}
+                food={GAME_CONFIGS.FOOD_NUMBER} />
         </div>
     )
 }
