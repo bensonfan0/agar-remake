@@ -19,7 +19,7 @@ export const initState = () => {
 
 // Returns { me, others, food }
 export const getCurrentState = () => {
-
+    
 }
 
 export const processGameState = (gameState) => {

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import GameStage from './gameStage';
-import { GAME_CONFIGS } from '../config/gameConfigs';
-import { connect } from '../networking';
+import { connect } from '../networking/networking';
+import { getCurrentState } from '../networking/state';
 
 
-let areWeConnectedPromise = connect('called to connect');
+//let myConnection = connect('called to connect');
 
 const Game = () => {
     // TODO: screen moves with coordinates 
@@ -14,7 +14,7 @@ const Game = () => {
     const [pollAgain, setPollAgain] = useState(0);
 
 
-    // this should be where rendering happens
+    // this should be where rendering happens --> this has to call getCurrentState...
     useEffect(() => {
         fetch("/api")
         .then(res => res.json())
@@ -29,14 +29,12 @@ const Game = () => {
         }
     }, [pollAgain]);
 
+    //console.log(GAME_CONFIGS);
+
     return (
         <div>
             <p>From server: {data}</p>
-            <GameStage
-                population={GAME_CONFIGS.PLAYER_POPULATION}
-                botPopulation={GAME_CONFIGS.BOT_POPULATION}
-                playerAcceleration={GAME_CONFIGS.PLAYER_ACCELERATION}
-                food={GAME_CONFIGS.FOOD_NUMBER} />
+            <GameStage />
         </div>
     )
 }

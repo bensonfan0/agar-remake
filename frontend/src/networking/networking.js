@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import { processGameState } from './state';
 
 /**
  * Note: socket.on(MESSAGE, callbackfn(parameter1, parameter2, ...)) 
@@ -29,6 +30,9 @@ export const connect = (sentence) => {
     //console.log('new promise created 1', socket);
     connectedPromise.then(() => {
         //console.log('connected we did it');
+        
+
+
     }).catch(reject => {
         console.log(reject.message, reject.socket);
     })

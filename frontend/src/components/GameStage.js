@@ -5,12 +5,12 @@ import {
     newPlayerCoordinates,
     randomRBGColor,
     blobElasticCollision
-} from '../gameHelper';
+} from '../gameHelperFrontEnd';
 import PlayerBlob from './playerBlob';
 import Food from './food';
 import {
     GAME_CONFIGS
-} from '../config/GameStats';
+} from '../config/gameConfigs';
 
 const randomSpawn = () => {
     let spawnCoordinates = { x: 0, y: 0 };
@@ -25,10 +25,10 @@ const setUpPlayers = (gameStageProps,
     listOfBotBlob,
     listOfFood,
     listOfRandomCoord) => {
-    for (let i = 0; i < gameStageProps.population; i++) {
+    for (let i = 0; i < GAME_CONFIGS.PLAYER_POPULATION; i++) {
         listOfPlayerBlob[i] = <PlayerBlob key={i}
             name={'filler_name'}
-            playerSpeed={gameStageProps.GAME_CONFIGS.PLAYER_ACCELERATION}
+            playerSpeed={GAME_CONFIGS.PLAYER_ACCELERATION}
             coordinates={randomSpawn()}
             area={GAME_CONFIGS.PLAYER_START_AREA}
             velocity={{ dx: 0, dy: 0 }}
@@ -36,10 +36,10 @@ const setUpPlayers = (gameStageProps,
             color={randomRBGColor()} />;
     }
 
-    for (let i = 0; i < gameStageProps.GAME_CONFIGS.BOT_POPULATION; i++) {
+    for (let i = 0; i < GAME_CONFIGS.BOT_POPULATION; i++) {
         listOfBotBlob[i] = <PlayerBlob key={i}
             name={`bot_${i}`}
-            playerSpeed={gameStageProps.GAME_CONFIGS.PLAYER_ACCELERATION}
+            playerSpeed={GAME_CONFIGS.PLAYER_ACCELERATION}
             coordinates={randomSpawn()}
             area={GAME_CONFIGS.PLAYER_START_AREA}
             velocity={{ dx: 0, dy: 0 }}
@@ -47,7 +47,7 @@ const setUpPlayers = (gameStageProps,
             color={randomRBGColor()} />;
     }
 
-    for (let j = 0; j < gameStageProps.food; j++) {
+    for (let j = 0; j < GAME_CONFIGS.FOOD_NUMBER; j++) {
         listOfFood[j] = <Food key={j}
             area={GAME_CONFIGS.FOOD_AREA}
             coordinates={randomSpawn()}
@@ -95,8 +95,8 @@ const GameStage = (props) => {
     // this is where all the rendering happens...
     useEffect(() => {
         moveListOfPlayerBlob();
-        // TODO: figure out how to use requestAnimationFrame() here instead of setInterval()
         const interval = setInterval(() => {
+            // TODO: update game state here
             setRenderTime(renderTime + 1);
         }, 1000 / 60); // 1000 ms / 60 frames -> 62.5 ms / 1 frame
 
