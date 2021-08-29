@@ -1,8 +1,16 @@
-import { GAME_CONFIGS } from "../frontend/src/config/gameConfigs";
+import { GAME_CONFIGS } from "../frontend/src/config/gameConfigs.js";
 
 /**
  * helper functions used in GameStage
  */
+
+export const randomSpawn = () => {
+    let spawnCoordinates = { x: 0, y: 0 };
+    // has to be a set size for map
+    spawnCoordinates.x = Math.random() * GAME_CONFIGS.WINDOW_SIZE.WIDTH;
+    spawnCoordinates.y = Math.random() * GAME_CONFIGS.WINDOW_SIZE.HEIGHT;
+    return spawnCoordinates;
+}
 
 
 export const randomRBGColor = () => {
@@ -13,68 +21,70 @@ export const randomRBGColor = () => {
 };
 
 // returns newCoordinates and newAcceleration
-export const newPlayerCoordinates = (playerCoordinates, mouseCoordinates, playerVelocity, gameAcceleration) => {
+export const newPlayerCoordinates = (player, mouseCoordinates) => {
     // within range
-    if (playerCoordinates.x < mouseCoordinates.x + 2 && playerCoordinates.x > mouseCoordinates.x - 2 && 
-        playerCoordinates.y < mouseCoordinates.y + 2 && playerCoordinates.y > mouseCoordinates.y - 2) return (
-        [playerCoordinates, {dx:0,dy:0}]
+    if (player.coordinates.x < mouseCoordinates.x + 2 && player.coordinates.x > mouseCoordinates.x - 2 && 
+        player.coordinates.y < mouseCoordinates.y + 2 && player.coordinates.y > mouseCoordinates.y - 2) return (
+        [player.coordinates, {dx:0,dy:0}]
     )
 
-    let xCoordBehindMouse = mouseCoordinates.x < playerCoordinates.x;
+    let xCoordBehindMouse = mouseCoordinates.x < player.coordinates.x;
     // handle y direction acceleration
-    let yCoordBelowMouse = mouseCoordinates.y < playerCoordinates.y;
-    let doDoubleTakeSpeed = gameAcceleration * 8;
+    let yCoordBelowMouse = mouseCoordinates.y < player.coordinates.y;
+    let doDoubleTakeSpeed = GAME_CONFIGS.PLAYER_ACCELERATION * 8;
 
     if (xCoordBehindMouse) {
-        if (playerVelocity.dx < 0) {
-            playerVelocity.dx += -gameAcceleration;
+        if (player.velocity.dx < 0) {
+            player.velocity.dx += -GAME_CONFIGS.PLAYER_ACCELERATION;
         } else {
             // accelerating wrong direction - do a double take
-            playerVelocity.dx += -doDoubleTakeSpeed;
+            player.velocity.dx += -doDoubleTakeSpeed;
         }
     } else if (!xCoordBehindMouse) {
-        if (playerVelocity.dx > 0) {
-            playerVelocity.dx += gameAcceleration;
+        if (player.velocity.dx > 0) {
+            player.velocity.dx += GAME_CONFIGS.PLAYER_ACCELERATION;
         } else {
             // accelerating wrong direction - do a double take
-            playerVelocity.dx += doDoubleTakeSpeed;
+            player.velocity.dx += doDoubleTakeSpeed;
         }
     }
     if (yCoordBelowMouse) {
-        if (playerVelocity.dy < 0) {
-            playerVelocity.dy += -gameAcceleration;
+        if (player.velocity.dy < 0) {
+            player.velocity.dy += -GAME_CONFIGS.PLAYER_ACCELERATION;
         } else {
-            playerVelocity.dy += -doDoubleTakeSpeed;
+            player.velocity.dy += -doDoubleTakeSpeed;
         }
     } else if (!yCoordBelowMouse) {
-        if (playerVelocity.dy > 0) {
-            playerVelocity.dy += gameAcceleration;
+        if (player.velocity.dy > 0) {
+            player.velocity.dy += GAME_CONFIGS.PLAYER_ACCELERATION;
         } else {
-            playerVelocity.dy += doDoubleTakeSpeed;
+            player.velocity.dy += doDoubleTakeSpeed;
         }
     }
 
-    let newCoordinates = { x: playerCoordinates.x, y: playerCoordinates.y };
-    newCoordinates.x += playerVelocity.dx;
-    newCoordinates.y += playerVelocity.dy;
+    let newCoordinates = { x: player.coordinates.x, y: player.coordinates.y };
+    newCoordinates.x += player.velocity.dx;
+    newCoordinates.y += player.velocity.dy;
 
-    return [newCoordinates, playerVelocity];
+    return [newCoordinates, player.velocity];
 };
 
 
 
 export const isCollidingBlob = (blob, listOfBlob) => {
-    let playerRadius = Math.sqrt(blob.props.area / Math.PI);
+    let playerRadius = Math.sqrt(blob.area / Math.PI);
     // no need to offset radius because compensated in Blob
-    let cx = blob.props.coordinates.x;
-    let cy = blob.props.coordinates.y;
+    let cx = blob.coordinates.x;
+    let cy = blob.coordinates.y;
     
     
     for (let i = 0; i < listOfBlob.length; i++) {
-        let otherBlobRadius = Math.sqrt(listOfBlob[i].props.area / Math.PI);
+        if (blob.id === listOfBlob[i].id) continue;
+
+        let otherBlobRadius = Math.sqrt(listOfBlob[i].area / Math.PI);
         // no need to offset radius because compensated in Blob
-        let cxOtherBlob = listOfBlob[i].props.coordinates.x;
-        let cyOtherBlob = listOfBlob[i].props.coordinates.y;
+        let cxOtherBlob = listOfBlob[i].coordinates.x;
+        let cyOtherBlob = listOfBlob[i].coordinates.y;
     
         let dx = cx - cxOtherBlob;
         let dy = cy - cyOtherBlob;
@@ -89,34 +99,36 @@ export const isCollidingBlob = (blob, listOfBlob) => {
     return [false, null];
 }
 
-export const handlePlayerCollision = (blob,
-    listOfAliveBlob,
-    newArea,
-    newCoordinates,
-    newPlayerColor,
-    newVelocity,
-    newVelocityOtherBlob) => {
-    let [isPlayerColliding, otherPlayer] = isCollidingPlayer(blob, listOfAliveBlob);
-    if (isPlayerColliding) {
-        if (otherPlayer.props.area > blob.props.area * GAME_CONFIGS.CONSUMABLE_RATIO) {
-            // die, spawn again
-            newArea = GAME_CONFIGS.PLAYER_START_AREA;
-            newCoordinates = randomSpawn();
-            newPlayerColor = randomRBGColor();
-        } else if (otherPlayer.props.area * GAME_CONFIGS.CONSUMABLE_RATIO < blob.props.area) {
-            // gain their area
-            newArea += otherPlayer.props.area;
-        } else {
-            // perfectly elastic collision
-            [newVelocity, newVelocityOtherBlob] = blobElasticCollision(blob, otherPlayer);
-        }
+// pass by reference?
+export const handlePlayerCollision = (player, otherPlayer) => {
+    if (otherPlayer.area > player.area * GAME_CONFIGS.CONSUMABLE_RATIO) {
+        // player die, spawn again
+        player.area = GAME_CONFIGS.PLAYER_START_AREA;
+        player.coordinates = randomSpawn();
+        player.color = randomRBGColor();
+
+        // otherPlayer gains mass 
+        otherPlayer.area += player.area;
+
+    } else if (otherPlayer.area * GAME_CONFIGS.CONSUMABLE_RATIO < player.areaa) {
+        // otherPlayer die, spawn again
+        otherPlayer.area = GAME_CONFIGS.PLAYER_START_AREA;
+        otherPlayer.coordinates = randomSpawn();
+        otherPlayer.color = randomRBGColor();
+
+        // player gains area
+        player.area += otherPlayer.area;
+    } else {
+        // perfectly elastic collision
+        [playerNewVelocity, otherPlayerNewVelocity] = blobElasticCollision(player, otherPlayer);
+        player.velocity = playerNewVelocity;
+        otherPlayer.velocity = otherPlayerNewVelocity;
     }
-    return [newArea, newCoordinates, newPlayerColor, newVelocity];
 }
 
 const blobElasticCollision = (blob1, blob2) => {
-    let obj1 = blob1.props.coordinates;
-    let obj2 = blob2.props.coordinates;
+    let obj1 = blob1.coordinates;
+    let obj2 = blob2.coordinates;
 
     /**
      * v      = {dx,dy}
@@ -131,8 +143,8 @@ const blobElasticCollision = (blob1, blob2) => {
      * https://spicyyoghurt.com/tutorials/html5-javascript-game-development/collision-detection-physics
      */
 
-    let newObj1Velocity = {dx:blob1.props.velocity.dx, dy:blob1.props.velocity.dy};
-    let newObj2Velocity = {dx:blob2.props.velocity.dx, dy:blob2.props.velocity.dy};
+    let newObj1Velocity = {dx:blob1.velocity.dx, dy:blob1.velocity.dy};
+    let newObj2Velocity = {dx:blob2.velocity.dx, dy:blob2.velocity.dy};
     
     let vCollision = {x: obj2.x - obj1.x, y: obj2.y - obj1.y};
     let distance = Math.sqrt((obj2.x-obj1.x)*(obj2.x-obj1.x) + (obj2.y-obj1.y)*(obj2.y-obj1.y));
@@ -143,12 +155,12 @@ const blobElasticCollision = (blob1, blob2) => {
     if (speed < 0){
         return [newObj1Velocity, newObj2Velocity];
     }
-    let impulse = 2 * speed / (blob1.props.area + blob2.props.area)
+    let impulse = 2 * speed / (blob1.area + blob2.area)
 
-    newObj1Velocity.dx -= (impulse * blob2.props.area * vCollisionNorm.x);
-    newObj1Velocity.dy -= (impulse * blob2.props.area * vCollisionNorm.y);
-    newObj2Velocity.dx += (impulse * blob1.props.area * vCollisionNorm.x);
-    newObj2Velocity.dy += (impulse * blob1.props.area * vCollisionNorm.y);
+    newObj1Velocity.dx -= (impulse * blob2.area * vCollisionNorm.x);
+    newObj1Velocity.dy -= (impulse * blob2.area * vCollisionNorm.y);
+    newObj2Velocity.dx += (impulse * blob1.area * vCollisionNorm.x);
+    newObj2Velocity.dy += (impulse * blob1.area * vCollisionNorm.y);
 
     return [newObj1Velocity, newObj2Velocity];
 }

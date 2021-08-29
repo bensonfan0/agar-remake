@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import { GAME_CONFIGS } from '../config/gameConfigs';
 import { processGameState } from './state';
 
 /**
@@ -29,11 +30,17 @@ export const connect = (sentence) => {
     console.log(sentence);
     //console.log('new promise created 1', socket);
     connectedPromise.then(() => {
-        //console.log('connected we did it');
-        
-
-
+        // handle socket emits from backend
+        socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.GAME_UPDATE, processGameState);
     }).catch(reject => {
         console.log(reject.message, reject.socket);
     })
+}
+
+export const play = username => {
+    socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.JOIN_GAME, username);
+}
+
+export const updateDirection = (mouseCoordinates) => {
+    socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, mouseCoordinates);
 }

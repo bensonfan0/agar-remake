@@ -1,7 +1,10 @@
 import express from 'express';
 import { Server } from 'socket.io';
+import { Game } from './gameBack.js';
+import { GAME_CONFIGS } from '../frontend/src/config/gameConfigs.js';
 import http from 'http';
 
+// need to add .js to end of path when using express & node
 
 const app = express(); 
 
@@ -24,9 +27,10 @@ setInterval(() => {
 
 io.on('connection', (socket) => {
   console.log('SOCKET.IO working -> a user connected with id: ' + socket.id);
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
+
+  socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.JOIN_GAME, joinGame);
+  socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, handleInput)
+  socket.on('disconnect', onDisconnect);
 })
 
 server.listen(port, () => {
@@ -34,7 +38,7 @@ server.listen(port, () => {
 })
 
 // Setup the Game
-const game = {};
+const game = new Game();
 
 function joinGame(username) {
   game.addPlayer(this, username);
@@ -45,5 +49,6 @@ function handleInput(dir) {
 }
 
 function onDisconnect() {
+  console.log('player Disconnected')
   game.removePlayer(this);
 }

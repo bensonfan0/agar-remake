@@ -12,6 +12,15 @@ export const GAME_CONFIGS = {
     CONSUMABLE_RATIO : 5/3,
     MAX_AREA : 100000,
     AMOUNT_BOUNCE : 1.5,
+    SOCKET_CONSTANTS : {
+        GAME_UPDATE : 'update',
+        JOIN_GAME : 'join',
+        INPUT : 'input'
+    },
+    WINDOW_SIZE : {
+        WIDTH : 1920,
+        HEIGHT : 1040,
+    }
 }
 
 
