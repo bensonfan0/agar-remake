@@ -18,8 +18,8 @@ export const testFunction = () => {
 export class Game {
     // this guy has to update
     constructor() {
-        this.listOfSocket = {};
-        this.listOfPlayer = {};
+        this.objectOfSockets = {};
+        this.objectOfPlayers = {};
         this.listOfFood = [];
         this.lastUpdateTime = Date.now();
         this.shouldSendUpdate = false;
@@ -29,9 +29,12 @@ export class Game {
     }
 
     addPlayer = (socket, username) => {
-        this.listOfSocket[socket] = username;
+        console.log('socket is this', socket);
+        console.log('username is this', username);
+        this.objectOfSockets[socket.id] = socket;
 
-        this.listOfPlayer[socket.id] = {
+        this.objectOfPlayers[socket.id] = {
+            id : socket.id,
             name : username,
             playerSpeed : GAME_CONFIGS.PLAYER_ACCELERATION,
             coordinates : randomSpawn(),
@@ -41,21 +44,20 @@ export class Game {
             color : randomRBGColor()
         };
 
-        console.log(this.listOfPlayer[socket.id].coordinates);
     }
 
     removePlayer = (socket) => {
-        delete this.listOfSocket[socket.id];
-        delete this.listOfPlayer[socket.id];
+        delete this.objectOfSockets[socket.id];
+        delete this.objectOfPlayers[socket.id];
     }
 
     handleInput = (socket, mouseCoordinates) => {
-        if (this.listOfPlayer[socket.id]) {
+        if (this.objectOfPlayers[socket.id]) {
             
-            let [newCoordinates, newVelocity] = newPlayerCoordinates(player, mouseCoordinates)
+            let [newCoordinates, newVelocity] = newPlayerCoordinates(this.objectOfPlayers[socket.id], mouseCoordinates)
 
-            this.listOfPlayer[socket.id].coordinates = newCoordinates;
-            this.listOfPlayer[socket.id].velocity = newVelocity;
+            this.objectOfPlayers[socket.id].coordinates = newCoordinates;
+            this.objectOfPlayers[socket.id].velocity = newVelocity;
         }
     }
 
@@ -65,8 +67,9 @@ export class Game {
         const lastUpdateTime = now;
 
         // add food
-        for (let i = this.listOfFood.length; i < GAME_CONFIGS.FOOD_NUMBER; i++) {
+        for (let i = this.listOfFood.length - 1; i < GAME_CONFIGS.FOOD_NUMBER; i++) {
             let foodState = {
+                id : i,
                 coordinates : randomSpawn(),
                 color : randomRBGColor()
             }
@@ -75,17 +78,19 @@ export class Game {
         
         
         const listOfFoodToRemove = [];
-        Object.keys(this.listOfPlayer).forEach(player => {
+        Object.keys(this.objectOfPlayers).forEach(playerID => {
             // food collision case
-            let [isCollision, foodToRemove] = isCollidingBlob(player, this.listOfFood);
+            let [isCollision, foodToRemoveID] = isCollidingBlob(this.objectOfPlayers[playerID], this.listOfFood);
             if (isCollision) {
-                listOfFoodToRemove.push(foodToRemove);
+                listOfFoodToRemove.push(this.listOfFood[foodToRemoveID]);
             }
             
             // player collision case -> for deaths we immediately respawn
-            [isCollision, otherPlayer] = isCollidingBlob(player, this.listOfPlayer);
+            let otherPlayerID = null;
+            [isCollision, otherPlayerID] = isCollidingBlob(this.objectOfPlayers[playerID], this.objectOfPlayers);
             if (isCollision) {
-                handlePlayerCollision(player, otherPlayer);
+                handlePlayerCollision(this.objectOfPlayers[playerID],
+                    this.objectOfPlayers[otherPlayerID]);
             }
             
         });
@@ -95,9 +100,9 @@ export class Game {
         
         // Send a game update to each player every other time (update 30 times a sec)
         if (this.shouldSendUpdate) {
-            Object.keys(this.listOfSocket).forEach(playerID => {
-            const socket = this.sockets[playerID];
-            const player = this.players[playerID];
+            Object.keys(this.objectOfSockets).forEach(socketID => {
+            const socket = this.objectOfSockets[socketID];
+            const player = this.objectOfPlayers[socketID];
             // backend emits to every connected websocket
             // TODO: to make individual player windows, implementation accounts for 
             //       limited rendering 
@@ -112,13 +117,14 @@ export class Game {
     // we render by the whole screen 
     createUpdate(player) {
         // this is state of game
-        let otherPlayers = Object.keys(this.listOfPlayer).filter( currPlayer =>
-            player !== currPlayer
+        let objectOfOtherPlayersID = Object.keys(this.objectOfPlayers).filter( 
+            currPlayerID => player.id !== currPlayerID
         );
+        //console.log(objectOfOtherPlayersID);
         return {
             t: Date.now(),
             me: player,
-            others: otherPlayers,
+            others: objectOfOtherPlayersID.map(otherPlayersId => (this.objectOfPlayers[otherPlayersId])),
             food: this.listOfFood,
         }
     }

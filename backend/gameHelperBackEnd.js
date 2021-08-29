@@ -70,7 +70,7 @@ export const newPlayerCoordinates = (player, mouseCoordinates) => {
 };
 
 
-
+// returns [boolIfColliding, blobThatIsColliding]
 export const isCollidingBlob = (blob, listOfBlob) => {
     let playerRadius = Math.sqrt(blob.area / Math.PI);
     // no need to offset radius because compensated in Blob
@@ -92,7 +92,8 @@ export const isCollidingBlob = (blob, listOfBlob) => {
         let cDistance = Math.sqrt(dx * dx + dy * dy);
     
         if (cDistance < playerRadius + otherBlobRadius) {
-            return [true, listOfBlob[i]];
+            // note: food.id is same as index of food
+            return [true, listOfBlob[id]];
         }
     }
     

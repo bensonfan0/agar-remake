@@ -3,6 +3,11 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import GameFront from './components/gameFront';
 import reportWebVitals from './reportWebVitals';
+import { connect, play } from './networking/networking';
+
+Promise.all([connect("connecting..."),])
+.then(() => play('random_name!'))
+.catch(err => console.log(err));
 
 ReactDOM.render(
   <React.StrictMode>

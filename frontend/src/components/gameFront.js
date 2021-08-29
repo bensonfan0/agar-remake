@@ -4,9 +4,9 @@ import { connect, updateDirection } from '../networking/networking';
 import { getCurrentState } from '../networking/state';
 
 
-let myConnection = connect('called to connect');
+//let serverConnection = connect('called to connect');
 
-const Game = () => {
+const GameFront = () => {
     // TODO: screen moves with coordinates 
     // TODO: able to 'shoot' half blob forward
     const pollInterval = 10000; // 30 updates a second
@@ -52,4 +52,4 @@ const Game = () => {
     )
 }
 
-export default Game;
+export default GameFront;

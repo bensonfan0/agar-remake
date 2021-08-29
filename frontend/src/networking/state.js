@@ -19,6 +19,18 @@ export const initState = () => {
 
 // Returns { me, others, food }
 export const getCurrentState = () => {
+    if (!firstServerTimestamp) {
+        return {}; // empty game state
+    }
+
+    const base = getBaseUpdate();
+    const serverTime = currentServerTime();
+
+    if (base < 0 || base === gameUpdates.length - 1) {
+        return gameUpdates[gameUpdates.length - 1];
+    } else {
+        // lets not do any interpolation yet.. and see what happens?
+    }
     
 }
 
@@ -27,6 +39,7 @@ export const processGameState = (gameState) => {
         firstServerTimestamp = gameState.t;
         gameStart = Date.now();
       }
+      console.log(gameState);
       gameUpdates.push(gameState);
     
       // Keep only one game update before the current server time

@@ -27,7 +27,7 @@ setInterval(() => {
 
 io.on('connection', (socket) => {
   console.log('SOCKET.IO working -> a user connected with id: ' + socket.id);
-
+  //console.log('I should be keeping track of socket?', socket);
   socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.JOIN_GAME, joinGame);
   socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, handleInput)
   socket.on('disconnect', onDisconnect);
@@ -36,6 +36,9 @@ io.on('connection', (socket) => {
 server.listen(port, () => {
   console.log(`Server listening on ${port}`)
 })
+
+setTimeout(() => console.log(this), 500);
+
 
 // Setup the Game
 const game = new Game();
