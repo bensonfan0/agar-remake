@@ -24,7 +24,6 @@ export const randomRBGColor = () => {
 export const newPlayerCoordinates = (player) => {
     let mouseCoordinates = player.mouseCoordinates;
     // within range
-    //console.log(mouseCoordinates.x, mouseCoordinates.y)
     if (player.coordinates.x < mouseCoordinates.x + 2 && player.coordinates.x > mouseCoordinates.x - 2 && 
         player.coordinates.y < mouseCoordinates.y + 2 && player.coordinates.y > mouseCoordinates.y - 2) return (
         [player.coordinates, {dx:0,dy:0}]
@@ -123,8 +122,6 @@ export const isCollidingPlayer = (blob, objectOfPlayers) => {
             let cDistance = Math.sqrt(dx * dx + dy * dy);
             
             if (cDistance < playerRadius + otherBlobRadius) {
-                // console.log('we are colliding!');
-                // console.log('this is cDistance',cDistance, 'this is playerRadius', playerRadius + otherBlobRadius);
                 return [true, value.id];
             }
         }

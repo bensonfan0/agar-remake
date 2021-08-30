@@ -17,19 +17,21 @@ app.use(express.static('./frontend/build'));
 const server = http.createServer(app);
 const io = new Server(server);
 
-let incrementMe = 0;
-setInterval(() => {
-  app.get("/testing", (req, res) => {
-    res.json({ message: `Hello from server! count: ${incrementMe}` });
-  });
-  incrementMe++;
-}, 500);
+/**
+ * For testing
+ */
+// let incrementMe = 0;
+// setInterval(() => {
+//   app.get("/testing", (req, res) => {
+//     res.json({ message: `Hello from server! count: ${incrementMe}` });
+//   });
+//   incrementMe++;
+// }, 500);
 
 
 io.on('connection', (socket) => {
   console.log('SOCKET.IO working -> a user connected with id: ' + socket.id);
   
-  //console.log('I should be keeping track of socket?', socket);
   socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.JOIN_GAME, joinGame);
   socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, handleInput)
   socket.on('disconnect', onDisconnect);
@@ -41,7 +43,6 @@ server.listen(port, () => {
 
 // Setup the Game
 const game = new Game();
-setTimeout(() => console.log(this), 500);
 
 function joinGame(username) {
   game.addPlayer(this, username);

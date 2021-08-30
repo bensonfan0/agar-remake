@@ -25,14 +25,11 @@ const GameFront = () => {
     const handleSubmit = () => {
         Promise.all([connect("connecting...")])
         .then(() => {
-        // want player to input name first...
         play(username);
         setTimeout(setShowStartMenu(false), 1000);
         })
         .catch(err => console.log(err));
     }
-
-    //console.log(GAME_CONFIGS);
 
     return (
         <div>

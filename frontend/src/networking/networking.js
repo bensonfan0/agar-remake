@@ -13,12 +13,10 @@ const socketProtocol = (window.location.protocol.includes('https')) ? 'wss' : 'w
 const socket = io(`${socketProtocol}://${window.location.host}`, { reconnection: false });
 
 const connectedPromise = new Promise((resolve, reject) => {
-    //console.log('new promise created 2', socket);
     socket.on('connect', () => {
         console.log('We got in!', socket);
         resolve();
     });
-
     socket.on("connect_error", (err) => {
         reject({message:`connect_error due to ${err.message} `, socket:socket});
     });
@@ -28,7 +26,6 @@ const connectedPromise = new Promise((resolve, reject) => {
 
 export const connect = (sentence) => {
     console.log(sentence);
-    //console.log('new promise created 1', socket);
     connectedPromise.then(() => {
         // handle socket emits from backend
         socket.on(GAME_CONFIGS.SOCKET_CONSTANTS.GAME_UPDATE, processGameState);
@@ -42,6 +39,5 @@ export const play = username => {
 }
 
 export const updateDirection = (mouseCoordinates) => {
-    //console.log('inside networking: moving mouse =>', mouseCoordinates.x, mouseCoordinates.y);
     socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, {x:mouseCoordinates.x, y:mouseCoordinates.y});
 }

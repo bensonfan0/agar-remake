@@ -8,7 +8,7 @@ const GameStage = (props) => {
     const [listOfPlayerBlob, setListOfPlayerBlob] = useState([]);
     const [listOfFood, setListOfFood] = useState([]);
 
-    // this is where all the rendering happens...
+    // RENDER
     useEffect(() => {
         const interval = setInterval(() => {
             // TODO: update game state here
@@ -25,8 +25,6 @@ const GameStage = (props) => {
     const updateGameStage = () => {
         // state returned is {food, me, others}
         let currentState = getCurrentState();
-
-        //console.log('this here is current state: ', currentState)
 
         let newListOfPlayerBlob = [];
         let newListOfFood = [];
@@ -48,11 +46,6 @@ const GameStage = (props) => {
         setListOfPlayerBlob(newListOfPlayerBlob);
         setListOfFood(newListOfFood);
     }
-
-    useEffect(() => {
-
-    }, [listOfFood, listOfPlayerBlob])
-
 
     const createPlayerBlob = (player) => {
         return <PlayerBlob key={player.id} 
