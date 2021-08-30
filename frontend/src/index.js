@@ -1,12 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import Game from './components/Game';
+import './css/index.css';
+import GameFront from './components/gameFront';
 import reportWebVitals from './reportWebVitals';
+//import { connect, play } from './networking/networking';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Game />
+    <GameFront />
   </React.StrictMode>,
   document.getElementById('root')
 );
