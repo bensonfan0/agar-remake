@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PlayerBlob from './playerBlob';
+import PlayerBlob from './PlayerBlob';
 import Blob from './Blob';
 import { getCurrentState } from '../networking/state';
 

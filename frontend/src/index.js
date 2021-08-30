@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './css/index.css';
-import GameFront from './components/gameFront';
+import GameFront from './components/GameFront';
 import reportWebVitals from './reportWebVitals';
-//import { connect, play } from './networking/networking';
 
 ReactDOM.render(
   <React.StrictMode>
