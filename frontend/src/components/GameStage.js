@@ -31,17 +31,15 @@ const GameStage = (props) => {
 
         if (currentState.me !== undefined) {
             newListOfPlayerBlob.push(createPlayerBlob(currentState.me));
-        }
 
-        if (currentState.others !== undefined) {
             currentState.others.forEach((otherPlayer) =>
                 newListOfPlayerBlob.push(createPlayerBlob(otherPlayer))
             );
-        }
 
-        currentState.food.forEach(food => {
-            newListOfFood.push(createFoodBlob(food))
-        })
+            currentState.food.forEach(food => {
+                newListOfFood.push(createFoodBlob(food))
+            })
+        }
 
         setListOfPlayerBlob(newListOfPlayerBlob);
         setListOfFood(newListOfFood);
