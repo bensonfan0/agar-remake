@@ -8,9 +8,11 @@ import {
 } from '../gameHelperFrontEnd';
 import PlayerBlob from './playerBlob';
 import Food from './food';
+import Blob from './blob';
 import {
     GAME_CONFIGS
 } from '../config/gameConfigs';
+import { getCurrentState } from '../networking/state';
 
 const randomSpawn = () => {
     let spawnCoordinates = { x: 0, y: 0 };
@@ -70,6 +72,73 @@ const GameStage = (props) => {
     const [listOfPlayerBlob, setListOfPlayerBlob] = useState([]);
     const [listOfBotBlob, setListOfBotBlob] = useState([]);
     const [listOfFood, setListOfFood] = useState([]);
+
+    // this is where all the rendering happens...
+    useEffect(() => {
+        const interval = setInterval(() => {
+            // TODO: update game state here
+            setRenderTime(renderTime + 1);
+            updateGameStage();
+        }, 1000 / 60); // 1000 ms / 60 frames -> 62.5 ms / 1 frame
+        
+        
+        return () => {
+            clearInterval(interval);
+        }
+    }, [renderTime]);
+    
+    const updateGameStage = () => {
+        // state returned is {food, me, others}
+        let currentState = getCurrentState();
+
+        //console.log('this here is current state: ', currentState)
+
+        let newListOfPlayerBlob = [];
+        let newListOfFood = [];
+
+        newListOfPlayerBlob.push(createPlayerBlob(currentState.me));
+        currentState.others.forEach((otherPlayer) =>
+            newListOfPlayerBlob.push(createPlayerBlob(otherPlayer))
+        );
+
+        currentState.food.forEach(food => {
+            newListOfFood.push(createFoodBlob(food))
+        })
+
+        setListOfPlayerBlob(newListOfPlayerBlob);
+        setListOfFood(newListOfFood);
+    }
+
+    useEffect(() => {
+
+    }, [listOfFood, listOfPlayerBlob])
+
+
+    const createPlayerBlob = (player) => {
+        return <PlayerBlob key={player.id} 
+            name={player.name}
+            coordinates={player.coordinates}
+            area={player.area}
+            color={player.color} 
+        />
+    }
+
+    const createFoodBlob = (food) => {
+        return <Blob key={food.id}
+            coordinates={food.coordinates}
+            color={food.color}
+            area={food.area}
+        />
+    }
+
+    return (
+        <div>
+            {listOfFood}
+            {listOfPlayerBlob}
+        </div>
+    )
+
+    
 
     if (listOfPlayerBlob.length === 0) {
         setUpPlayers(props,
@@ -271,13 +340,13 @@ const GameStage = (props) => {
         setListOfFood(newListOfFood);
     }
 
-    return (
-        <div>
-            {listOfFood}
-            {listOfPlayerBlob}
-            {listOfBotBlob}
-        </div>
-    )
+    // return (
+    //     <div>
+    //         {listOfFood}
+    //         {listOfPlayerBlob}
+    //         {listOfBotBlob}
+    //     </div>
+    // )
 }
 
 

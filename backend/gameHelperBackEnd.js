@@ -21,8 +21,10 @@ export const randomRBGColor = () => {
 };
 
 // returns newCoordinates and newAcceleration
-export const newPlayerCoordinates = (player, mouseCoordinates) => {
+export const newPlayerCoordinates = (player) => {
+    let mouseCoordinates = player.mouseCoordinates;
     // within range
+    //console.log(mouseCoordinates.x, mouseCoordinates.y)
     if (player.coordinates.x < mouseCoordinates.x + 2 && player.coordinates.x > mouseCoordinates.x - 2 && 
         player.coordinates.y < mouseCoordinates.y + 2 && player.coordinates.y > mouseCoordinates.y - 2) return (
         [player.coordinates, {dx:0,dy:0}]
@@ -71,20 +73,20 @@ export const newPlayerCoordinates = (player, mouseCoordinates) => {
 
 
 // returns [boolIfColliding, blobThatIsColliding]
-export const isCollidingBlob = (blob, listOfBlob) => {
+export const isCollidingFood = (blob, listOfFood) => {
     let playerRadius = Math.sqrt(blob.area / Math.PI);
     // no need to offset radius because compensated in Blob
     let cx = blob.coordinates.x;
     let cy = blob.coordinates.y;
     
     
-    for (let i = 0; i < listOfBlob.length; i++) {
-        if (blob.id === listOfBlob[i].id) continue;
+    for (let i = 0; i < listOfFood.length; i++) {
+        if (blob.id === listOfFood[i].id) continue;
 
-        let otherBlobRadius = Math.sqrt(listOfBlob[i].area / Math.PI);
+        let otherBlobRadius = Math.sqrt(listOfFood[i].area / Math.PI);
         // no need to offset radius because compensated in Blob
-        let cxOtherBlob = listOfBlob[i].coordinates.x;
-        let cyOtherBlob = listOfBlob[i].coordinates.y;
+        let cxOtherBlob = listOfFood[i].coordinates.x;
+        let cyOtherBlob = listOfFood[i].coordinates.y;
     
         let dx = cx - cxOtherBlob;
         let dy = cy - cyOtherBlob;
@@ -93,7 +95,38 @@ export const isCollidingBlob = (blob, listOfBlob) => {
     
         if (cDistance < playerRadius + otherBlobRadius) {
             // note: food.id is same as index of food
-            return [true, listOfBlob[id]];
+            return [true, listOfFood[i]];
+        }
+    }
+    
+    return [false, null];
+}
+
+export const isCollidingPlayer = (blob, objectOfPlayers) => {
+    let playerRadius = Math.sqrt(blob.area / Math.PI);
+    // no need to offset radius because compensated in Blob
+    let cx = blob.coordinates.x;
+    let cy = blob.coordinates.y;
+
+    let retVal = [false, null];
+
+    for (const [key, value] of Object.entries(objectOfPlayers)) {
+        if ( blob.id !== value.id) {
+            let otherBlobRadius = Math.sqrt(value.area / Math.PI);
+            // no need to offset radius because compensated in Blob
+            let cxOtherBlob = value.coordinates.x;
+            let cyOtherBlob = value.coordinates.y;
+        
+            let dx = cx - cxOtherBlob;
+            let dy = cy - cyOtherBlob;
+            
+            let cDistance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (cDistance < playerRadius + otherBlobRadius) {
+                // console.log('we are colliding!');
+                // console.log('this is cDistance',cDistance, 'this is playerRadius', playerRadius + otherBlobRadius);
+                return [true, value.id];
+            }
         }
     }
     
@@ -121,7 +154,7 @@ export const handlePlayerCollision = (player, otherPlayer) => {
         player.area += otherPlayer.area;
     } else {
         // perfectly elastic collision
-        [playerNewVelocity, otherPlayerNewVelocity] = blobElasticCollision(player, otherPlayer);
+        let [playerNewVelocity, otherPlayerNewVelocity] = blobElasticCollision(player, otherPlayer);
         player.velocity = playerNewVelocity;
         otherPlayer.velocity = otherPlayerNewVelocity;
     }
@@ -162,6 +195,5 @@ const blobElasticCollision = (blob1, blob2) => {
     newObj1Velocity.dy -= (impulse * blob2.area * vCollisionNorm.y);
     newObj2Velocity.dx += (impulse * blob1.area * vCollisionNorm.x);
     newObj2Velocity.dy += (impulse * blob1.area * vCollisionNorm.y);
-
     return [newObj1Velocity, newObj2Velocity];
 }

@@ -42,6 +42,6 @@ export const play = username => {
 }
 
 export const updateDirection = (mouseCoordinates) => {
-    console.log('networking and moving mouse!')
-    socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, mouseCoordinates);
+    //console.log('inside networking: moving mouse =>', mouseCoordinates.x, mouseCoordinates.y);
+    socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.INPUT, {x:mouseCoordinates.x, y:mouseCoordinates.y});
 }

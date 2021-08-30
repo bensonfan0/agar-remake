@@ -10,6 +10,7 @@ const app = express();
 
 const port = process.env.PORT || 3000; 
 
+// TODO: UNCOMMENT THIS GUY!!!
 app.use(express.static('./frontend/build'));
 
 // Setup socket.io
@@ -47,8 +48,8 @@ function joinGame(username) {
   game.addPlayer(this, username);
 }
 
-function handleInput(dir) {
-  game.handleInput(this, dir);
+function handleInput(mouseCoordinates) {
+  game.handleInput(this, mouseCoordinates);
 }
 
 function onDisconnect() {

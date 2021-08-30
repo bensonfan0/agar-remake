@@ -9,7 +9,7 @@
 
 // NEED TO ADD .js TO FILE NAMES WHEN IN NODE
 import { GAME_CONFIGS } from "../frontend/src/config/gameConfigs.js";
-import { isCollidingBlob, newPlayerCoordinates , handlePlayerCollision, randomRBGColor, randomSpawn } from "./gameHelperBackEnd.js";
+import { isCollidingFood, isCollidingPlayer, newPlayerCoordinates , handlePlayerCollision, randomRBGColor, randomSpawn } from "./gameHelperBackEnd.js";
 
 export const testFunction = () => {
     console.log('hi! from gameBack');
@@ -41,7 +41,8 @@ export class Game {
             area : GAME_CONFIGS.PLAYER_START_AREA,
             velocity : { dx: 0, dy: 0 },
             maxVelocity : GAME_CONFIGS.MAX_VELOCITY_NUMERATOR / GAME_CONFIGS.PLAYER_START_AREA,
-            color : randomRBGColor()
+            color : randomRBGColor(),
+            mouseCoordinates: {x:0, y:0}
         };
 
     }
@@ -52,52 +53,76 @@ export class Game {
     }
 
     handleInput = (socket, mouseCoordinates) => {
+        //console.log('handleInput', mouseCoordinates);
         if (this.objectOfPlayers[socket.id]) {
-            
-            let [newCoordinates, newVelocity] = newPlayerCoordinates(this.objectOfPlayers[socket.id], mouseCoordinates)
+            this.objectOfPlayers[socket.id].mouseCoordinates = mouseCoordinates;
+            // let [newCoordinates, newVelocity] = newPlayerCoordinates(this.objectOfPlayers[socket.id], mouseCoordinates)
 
-            this.objectOfPlayers[socket.id].coordinates = newCoordinates;
-            this.objectOfPlayers[socket.id].velocity = newVelocity;
+            // this.objectOfPlayers[socket.id].coordinates = newCoordinates;
+            // this.objectOfPlayers[socket.id].velocity = newVelocity;
         }
     }
 
     update = () => {
+        //console.log('update being called');
         const now = Date.now();
         const dt = (now - this.lastUpdateTime) / 1000; // dt in seconds
         const lastUpdateTime = now;
 
-        // add food
-        for (let i = this.listOfFood.length - 1; i < GAME_CONFIGS.FOOD_NUMBER; i++) {
+        // add food 
+        for (let i = this.listOfFood.length; i < GAME_CONFIGS.FOOD_NUMBER; i++) {
             let foodState = {
                 id : i,
                 coordinates : randomSpawn(),
-                color : randomRBGColor()
+                color : randomRBGColor(),
+                area : GAME_CONFIGS.FOOD_AREA
             }
             this.listOfFood.push(foodState);
         }
         
         
         const listOfFoodToRemove = [];
-        Object.keys(this.objectOfPlayers).forEach(playerID => {
+        for (const [key, currPlayer] of Object.entries(this.objectOfPlayers)) {
+            
+            
             // food collision case
-            let [isCollision, foodToRemoveID] = isCollidingBlob(this.objectOfPlayers[playerID], this.listOfFood);
+            let [isCollision, foodToRemoveID] = isCollidingFood(currPlayer, this.listOfFood);
             if (isCollision) {
-                listOfFoodToRemove.push(this.listOfFood[foodToRemoveID]);
+                console.log('do i ever collide with food?');
+                currPlayer.area += GAME_CONFIGS.FOOD_AREA;
+                listOfFoodToRemove.push(foodToRemoveID);
             }
             
             // player collision case -> for deaths we immediately respawn
-            let otherPlayerID = null;
-            [isCollision, otherPlayerID] = isCollidingBlob(this.objectOfPlayers[playerID], this.objectOfPlayers);
-            if (isCollision) {
-                handlePlayerCollision(this.objectOfPlayers[playerID],
-                    this.objectOfPlayers[otherPlayerID]);
-            }
+            let [isPlayerColliding, otherPlayerID] = isCollidingPlayer(currPlayer, this.objectOfPlayers);
+            //console.log(isPlayerColliding);
+            //console.log(otherPlayerID);
             
-        });
+            if (isPlayerColliding) {
+                console.log('do i ever collide with players?');
+                handlePlayerCollision(currPlayer,
+                    this.objectOfPlayers[otherPlayerID]);
+                }
 
-        // destroy food
-        this.listOfFood = this.listOfFood.filter(food => !listOfFoodToRemove.includes(food));
-        
+                
+            let [newCoordinates, newVelocity] = newPlayerCoordinates(currPlayer);
+            currPlayer.coordinates = newCoordinates;
+            currPlayer.velocity = newVelocity;
+        }
+
+        // destroy food -> we are reassigning ids here (probably poor practice)
+        let prevIndex = 0;
+        this.listOfFood = this.listOfFood.filter((food, index) => {
+            let isKeep = !listOfFoodToRemove.includes(food);
+            // keep track of previous index 
+            if (isKeep) {
+                food.id = prevIndex;
+                prevIndex = index;
+            }
+
+            return isKeep;
+            });
+
         // Send a game update to each player every other time (update 30 times a sec)
         if (this.shouldSendUpdate) {
             Object.keys(this.objectOfSockets).forEach(socketID => {

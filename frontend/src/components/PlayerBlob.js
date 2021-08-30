@@ -8,6 +8,7 @@ let playerSettings = { playerName: 'filler_name', color: randomRBGColor(), coord
 const PlayerBlob = (props) => {
     // NOTE: don't manipulate coordinates (b/c object) and return back to useState
     //       since it is pass by reference React won't know if original changed
+    
     const [area, setarea] = useState(props.area);
     useEffect(() => {
         setarea(props.area);
