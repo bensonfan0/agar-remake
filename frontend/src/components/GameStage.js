@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PlayerBlob from './playerBlob';
-import Blob from './blob';
+import Blob from './Blob';
 import { getCurrentState } from '../networking/state';
 
 const GameStage = (props) => {

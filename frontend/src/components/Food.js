@@ -1,5 +1,5 @@
 import React from 'react';
-import Blob from './blob';
+import Blob from './Blob';
 
 /**
  * DEPRECATED

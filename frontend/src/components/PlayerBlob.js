@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Blob from './blob';
+import Blob from './Blob';
 import { randomRBGColor } from '../gameHelperFrontEnd';
 
 let playerSettings = { playerName: 'filler_name', color: randomRBGColor(), coordinates: { x: 0, y: 0 } };

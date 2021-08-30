@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import GameStage from './gameStage';
+import GameStage from './GameStage';
 import { updateDirection, connect, play } from '../networking/networking';
 
 const GameFront = () => {
