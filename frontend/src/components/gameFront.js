@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import GameStage from './gameStage';
-import { connect, updateDirection } from '../networking/networking';
-import { getCurrentState } from '../networking/state';
-
-
-//let serverConnection = connect('called to connect');
+import { updateDirection, connect, play } from '../networking/networking';
 
 const GameFront = () => {
     // TODO: screen moves with coordinates 
     // TODO: able to 'shoot' half blob forward
-    const pollInterval = 10000; // 30 updates a second
-    const [data, setData] = useState(null);
-    const [pollAgain, setPollAgain] = useState(0);
     const [mouseCoordinates, setMouseCoordinates] = useState({ x: 0, y: 0 });
+    const [username, setUsername] = useState('');
+
+    const [showStartMenu, setShowStartMenu] = useState(true);
 
     useEffect(() => {
         window.addEventListener("mousemove", handleMouseMove);
@@ -25,29 +21,32 @@ const GameFront = () => {
         setMouseCoordinates({x:e.x, y:e.y});
         updateDirection(e);
     }
-    
-    // this should be where rendering happens --> this has to call getCurrentState...
-    useEffect(() => {
-        fetch("/api")
-        .then(res => res.json())
-        .then(data => setData(data.message))
+
+    const handleSubmit = () => {
+        Promise.all([connect("connecting...")])
+        .then(() => {
+        // want player to input name first...
+        play(username);
+        setTimeout(setShowStartMenu(false), 1000);
+        })
         .catch(err => console.log(err));
-        
-        const interval = setInterval(() => {
-            setPollAgain(pollAgain + 1);
-        }, pollInterval); // 1000 ms / 60 frames -> 62.5 ms / 1 frame
-        
-        return () => {
-            clearInterval(interval);
-        }
-    }, [pollAgain]);
+    }
 
     //console.log(GAME_CONFIGS);
 
     return (
         <div>
-            <p>From server: {data}</p>
-            <GameStage />
+            { showStartMenu ? 
+            <div className='start-menu'>
+                <p className='welcome-start-menu'>
+                    WELCOME TO A BOOTLEG AGAR.IO!
+                </p>
+                <input type="text" placeholder="Enter Username" name="uname" required onChange={(e) => {
+                    setUsername(e.target.value);
+                }}/>
+                <input type="submit" value="Play!" onClick={handleSubmit}/>
+            </div> 
+                : <GameStage /> }
         </div>
     )
 }

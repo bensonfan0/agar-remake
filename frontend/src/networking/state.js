@@ -34,7 +34,6 @@ export const getCurrentState = () => {
     } else {
         // lets not do any interpolation yet.. and see what happens?
     }
-    
 }
 
 export const processGameState = (gameState) => {

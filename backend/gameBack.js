@@ -24,6 +24,7 @@ export class Game {
         this.lastUpdateTime = Date.now();
         this.shouldSendUpdate = false;
 
+        console.log('i get auto created right?');
         // call this object's update() fn every 1000/60 ms
         setInterval(this.update.bind(this), 1000/60);
     }
@@ -53,18 +54,13 @@ export class Game {
     }
 
     handleInput = (socket, mouseCoordinates) => {
-        //console.log('handleInput', mouseCoordinates);
         if (this.objectOfPlayers[socket.id]) {
             this.objectOfPlayers[socket.id].mouseCoordinates = mouseCoordinates;
-            // let [newCoordinates, newVelocity] = newPlayerCoordinates(this.objectOfPlayers[socket.id], mouseCoordinates)
-
-            // this.objectOfPlayers[socket.id].coordinates = newCoordinates;
-            // this.objectOfPlayers[socket.id].velocity = newVelocity;
         }
     }
 
     update = () => {
-        //console.log('update being called');
+        // console.log('update being called');
         const now = Date.now();
         const dt = (now - this.lastUpdateTime) / 1000; // dt in seconds
         const lastUpdateTime = now;
@@ -104,7 +100,7 @@ export class Game {
                     this.objectOfPlayers[otherPlayerID]);
                 }
 
-                
+
             let [newCoordinates, newVelocity] = newPlayerCoordinates(currPlayer);
             currPlayer.coordinates = newCoordinates;
             currPlayer.velocity = newVelocity;
@@ -121,20 +117,27 @@ export class Game {
             }
 
             return isKeep;
-            });
+        });
 
         // Send a game update to each player every other time (update 30 times a sec)
         if (this.shouldSendUpdate) {
-            Object.keys(this.objectOfSockets).forEach(socketID => {
-            const socket = this.objectOfSockets[socketID];
-            const player = this.objectOfPlayers[socketID];
-            // backend emits to every connected websocket
-            // TODO: to make individual player windows, implementation accounts for 
-            //       limited rendering 
-            socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.GAME_UPDATE, this.createUpdate(player));
-            });
+            for (const [socketID, currPlayer] of Object.entries(this.objectOfPlayers)) {
+                const socket = this.objectOfSockets[socketID];
+                const player = currPlayer;
+                // backend emits to every connected websocket
+                // TODO: to make individual player windows, implementation accounts for 
+                //       limited rendering 
+                socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.GAME_UPDATE, this.createUpdate(player));
+            }
+
+            if (Object.keys(this.objectOfPlayers).length === 0) {
+                // player hasn't joined yet
+                //socket.emit(GAME_CONFIGS.SOCKET_CONSTANTS.GAME_UPDATE, this.createUpdate(player));
+            }
+
             this.shouldSendUpdate = false;
         } else {
+            //console.log('guess im never updating');
             this.shouldSendUpdate = true;
         } 
     }
